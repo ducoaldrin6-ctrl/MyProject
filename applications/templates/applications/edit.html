@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Application | Richwell Colleges Inc.{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, #3B0764 0%, #5B21B6 55%, #7C3AED 100%);
+  padding: 52px 40px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(253,224,71,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 860px; margin: 0 auto; position: relative; }
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: #C4B5FD; margin-bottom: 12px;
+  background: rgba(255,255,255,.08); padding: 5px 12px;
+  border-radius: 999px; border: 1px solid rgba(255,255,255,.12);
+}
+.hero h1 { font-size: clamp(26px,5vw,40px); font-weight: 700; color:#fff; margin:0 0 10px; line-height:1.15; letter-spacing:-.4px; }
+.hero h1 span { color: #FCD34D; }
+.hero p { font-size:15px; color:rgba(255,255,255,.7); margin:0; }
+
+/* ── CONTAINER ── */
+.container { max-width:860px; margin:0 auto; padding:36px 24px 72px; }
+
+/* ── FORM CARD ── */
+.form-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #EDE9FE;
+  box-shadow: 0 2px 6px rgba(0,0,0,.06), 0 12px 40px rgba(91,33,182,.08);
+  overflow: hidden;
+}
+.form-card-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 22px 32px;
+  background: linear-gradient(to right, #F5F3FF, #EDE9FE);
+  border-bottom: 1px solid #DDD6FE;
+}
+.form-card-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #DDD6FE, #C4B5FD);
+  border-radius: 12px; font-size: 22px; flex-shrink: 0;
+}
+.form-card-header h2 { font-size: 17px; font-weight: 700; color: #111827; margin: 0 0 3px; }
+.form-card-header p { font-size: 13px; color: #6B7280; margin: 0; }
+
+/* ── FORM BODY ── */
+.form-body { padding: 28px 32px; }
+
+/* ── ALERTS ── */
+.alert {
+  padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 22px;
+  border-left: 4px solid transparent; display: flex; gap: 10px; align-items: flex-start;
+}
+.alert-success { background:#D1FAE5; color:#065F46; border-left-color:#059669; }
+.alert-error   { background:#FEE2E2; color:#991B1B; border-left-color:#DC2626; }
+.alert-warning { background:#FEF3C7; color:#92400E; border-left-color:#D97706; }
+
+/* ── FORM SECTIONS ── */
+.form-section {
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #F3F4F6;
+}
+.form-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.form-section-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: #7C3AED; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.form-section-title::after {
+  content: ''; flex: 1; height: 1px; background: #EDE9FE;
+}
+
+/* ── FORM ROWS & GROUPS ── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+label { font-size: 12px; font-weight: 600; color: #374151; letter-spacing: .02em; }
+input[type="text"], input[type="email"], input[type="number"],
+select, textarea {
+  padding: 10px 14px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1F2937;
+  background: #FAFAFA;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+input::placeholder, textarea::placeholder { color: #9CA3AF; }
+input:focus, select:focus, textarea:focus {
+  border-color: #7C3AED;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(124,58,237,.12);
+}
+textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
+select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+/* ── FOOTER ── */
+.form-footer {
+  padding: 20px 32px;
+  border-top: 1px solid #F3F4F6;
+  background: #FAFAFA;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.btn-submit {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px;
+  border: none; border-radius: 10px; cursor: pointer;
+  background: linear-gradient(135deg, #4C1D95 0%, #7C3AED 100%);
+  color: #fff; font-family: inherit; font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 16px rgba(91,33,182,.35);
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(91,33,182,.45); }
+.btn-cancel {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 22px; border-radius: 10px;
+  border: 1.5px solid #E5E7EB; background: #fff;
+  color: #6B7280; font-family: inherit; font-size: 14px; font-weight: 500;
+  text-decoration: none; transition: border-color .15s, color .15s, background .15s;
+}
+.btn-cancel:hover { border-color: #7C3AED; color: #7C3AED; background: #F5F3FF; }
+
+@media(max-width:640px){
+  .form-row { grid-template-columns: 1fr; }
+  .form-body, .form-card-header, .form-footer { padding-left: 20px; padding-right: 20px; }
+  .hero { padding: 36px 20px 32px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Student Portal</div>
+    <h1>Edit <span>Your Application</span></h1>
+    <p>Update your scholarship details carefully, then save your changes.</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-card-icon">✏️</div>
+      <div>
+        <h2>Edit Application</h2>
+        <p>Richwell Colleges Inc. — Academic Year 2025–2026</p>
+      </div>
+    </div>
+
+    <div class="form-body">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+
+        <!-- PERSONAL INFO -->
+        <div class="form-section">
+          <div class="form-section-title">Personal Information</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="full_name">Full Name</label>
+              <input type="text" id="full_name" name="full_name" value="{{ application.full_name }}" required>
+            </div>
+            <div class="form-group">
+              <label for="age">Age</label>
+              <input type="number" id="age" name="age" min="15" max="35" placeholder="e.g. 20" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" value="{{ application.email }}" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Home Address</label>
+            <input type="text" id="address" name="address" placeholder="e.g. 123 Rizal St., Barangay San Jose, Manila" required>
+          </div>
+        </div>
+
+        <!-- PARENT / GUARDIAN INFO -->
+        <div class="form-section">
+          <div class="form-section-title">Parent &amp; Guardian Information</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="parent_name">Parent Name</label>
+              <input type="text" id="parent_name" name="parent_name" placeholder="e.g. Maria dela Cruz" required>
+            </div>
+            <div class="form-group">
+              <label for="parent_contact">Parent Contact No.</label>
+              <input type="text" id="parent_contact" name="parent_contact" placeholder="e.g. +63 912 345 6789" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="guardian_name">Legal Guardian Name</label>
+              <input type="text" id="guardian_name" name="guardian_name" placeholder="If different from parent">
+            </div>
+            <div class="form-group">
+              <label for="guardian_contact">Guardian Contact No.</label>
+              <input type="text" id="guardian_contact" name="guardian_contact" placeholder="e.g. +63 917 654 3210">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="guardian_relationship">Relationship to Student</label>
+            <select id="guardian_relationship" name="guardian_relationship">
+              <option value="">Select Relationship</option>
+              <option value="Parent">Parent</option>
+              <option value="Grandparent">Grandparent</option>
+              <option value="Sibling">Sibling</option>
+              <option value="Aunt/Uncle">Aunt / Uncle</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ACADEMIC INFO -->
+        <div class="form-section">
+          <div class="form-section-title">Academic Information</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="course">Course / Program</label>
+              <input type="text" id="course" name="course" value="{{ application.course }}" placeholder="e.g. BS Computer Science" required>
+            </div>
+            <div class="form-group">
+              <label for="year_level">Year Level</label>
+              <select id="year_level" name="year_level" required>
+                <option value="">Select Year</option>
+                <option value="1st Year" {% if application.year_level == "1st Year" %}selected{% endif %}>1st Year</option>
+                <option value="2nd Year" {% if application.year_level == "2nd Year" %}selected{% endif %}>2nd Year</option>
+                <option value="3rd Year" {% if application.year_level == "3rd Year" %}selected{% endif %}>3rd Year</option>
+                <option value="4th Year" {% if application.year_level == "4th Year" %}selected{% endif %}>4th Year</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMMITMENT & STATEMENT -->
+        <div class="form-section">
+          <div class="form-section-title">Commitment &amp; Statement</div>
+
+          <div class="form-group">
+            <label for="commitment">Commitment Fee</label>
+            <select id="commitment" name="commitment" required>
+              <option value="">Select Amount</option>
+              <option value="1000" {% if application.commitment == "1000" %}selected{% endif %}>₱1,000</option>
+              <option value="1500" {% if application.commitment == "1500" %}selected{% endif %}>₱1,500</option>
+              <option value="2000" {% if application.commitment == "2000" %}selected{% endif %}>₱2,000</option>
+              <option value="2500" {% if application.commitment == "2500" %}selected{% endif %}>₱2,500</option>
+            </select>
+            <p style="font-size:12px;color:#9CA3AF;margin-top:6px;">Commitment fee ranges from ₱1,000 to ₱2,500 depending on the scholarship.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="statement">Personal Statement</label>
+            <textarea id="statement" name="statement" rows="5" required>{{ application.statement }}</textarea>
+          </div>
+        </div>
+
+      </div><!-- /.form-body -->
+
+      <div class="form-footer">
+        <a class="btn-cancel" href="{% url 'applications:detail' application.id %}">← Cancel</a>
+        <button class="btn-submit" type="submit">Save Changes →</button>
+      </div>
+      </form>
+  </div>
+</div>
+
+{% endblock %}

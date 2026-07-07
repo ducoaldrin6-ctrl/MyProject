@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance | Richwell Colleges Inc.{% endblock %}
+
+{% block head %}
+<style>
+  .att-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--purple); text-decoration: none; margin-bottom: 24px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--white); transition: background .15s, box-shadow .15s; }
+  .att-back:hover { background: var(--purple-light); box-shadow: 0 4px 12px rgba(59,7,100,.1); }
+
+  .att-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .att-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px,5vw,42px); font-weight: 700; color: var(--text-dark); margin: 0 0 28px; }
+
+  .att-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .att-card-head { padding: 20px 28px; background: var(--cream); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .att-card-head h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0; }
+
+  table.att-tbl { width: 100%; border-collapse: collapse; font-family: 'DM Sans', sans-serif; }
+  .att-tbl thead tr { background: linear-gradient(135deg, var(--purple), #200040); }
+  .att-tbl thead th { padding: 13px 20px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.65); text-align: left; }
+  .att-tbl thead th:first-child { padding-left: 28px; }
+  .att-tbl thead th:last-child  { padding-right: 28px; }
+  .att-tbl tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+  .att-tbl tbody tr:last-child { border-bottom: none; }
+  .att-tbl tbody tr:hover { background: var(--cream); }
+  .att-tbl tbody td { padding: 14px 20px; font-size: 14px; color: var(--text-dark); vertical-align: middle; }
+  .att-tbl tbody td:first-child { padding-left: 28px; font-weight: 500; }
+  .att-tbl tbody td:last-child  { padding-right: 28px; color: var(--text-muted); font-size: 13px; }
+
+  .att-pill { display: inline-flex; align-items: center; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .att-pill.present { background: #d1fae5; color: #065f46; }
+  .att-pill.absent  { background: #fee2e2; color: #991b1b; }
+  .att-pill.late    { background: #fef3c7; color: #92400e; }
+
+  .att-empty { padding: 48px; text-align: center; color: var(--text-muted); font-size: 14px; }
+  .att-empty-icon { font-size: 36px; margin-bottom: 10px; }
+</style>
+{% endblock %}
+
+{% block content %}
+  <a class="att-back" href="{% url 'users:profile' %}">← Back to Student Profile</a>
+
+  <div class="att-eyebrow">Richwell Colleges Inc.</div>
+  <h1 class="att-title">Attendance Records</h1>
+
+  <div class="att-card">
+    <div class="att-card-head">
+      <span style="font-size:20px">📋</span>
+      <h3>Your Attendance History</h3>
+    </div>
+    <table class="att-tbl">
+      <thead>
+        <tr><th>Date</th><th>Status</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        {% for a in attendance_list %}
+        <tr>
+          <td>{{ a.date }}</td>
+          <td>
+            <span class="att-pill {% if 'present' in a.get_status_display|lower %}present{% elif 'absent' in a.get_status_display|lower %}absent{% else %}late{% endif %}">
+              {{ a.get_status_display }}
+            </span>
+          </td>
+          <td>{{ a.notes }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3">
+            <div class="att-empty">
+              <div class="att-empty-icon">📭</div>
+              No attendance records yet.
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

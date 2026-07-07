@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% block title %}Application Detail | Richwell Colleges Inc.{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, #3B0764 0%, #5B21B6 55%, #7C3AED 100%);
+  padding: 48px 40px 44px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 50%, rgba(124,58,237,.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.hero-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #C4B5FD;
+  margin-bottom: 10px;
+  display: block;
+}
+.hero h1 {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
+  line-height: 1.2;
+  letter-spacing: -.3px;
+}
+.hero p { font-size: 13px; color: rgba(255,255,255,.65); margin: 0; }
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .15s;
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.btn-back:hover { background: rgba(255,255,255,.18); }
+
+/* ── LAYOUT ── */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 36px 24px 64px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+@media(max-width:720px){ .container { grid-template-columns: 1fr; } }
+
+/* ── ALERTS ── */
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  border-left: 4px solid transparent;
+}
+.alert-success { background:#D1FAE5; color:#065F46; border-left-color:#059669; }
+.alert-error   { background:#FEE2E2; color:#991B1B; border-left-color:#DC2626; }
+.alert-warning { background:#FEF3C7; color:#92400E; border-left-color:#D97706; }
+
+/* ── INFO CARDS ── */
+.info-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #EDE9FE;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 6px 20px rgba(91,33,182,.05);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #F3F4F6;
+  background: linear-gradient(to right, #FAFAFA, #F5F3FF);
+}
+.info-card-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #EDE9FE, #DDD6FE);
+  border-radius: 10px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.info-card-header h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px;
+}
+.info-card-header p {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0;
+}
+.info-body { padding: 20px 22px; }
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.field-row:last-child { margin-bottom: 0; }
+.profile-field { display: flex; flex-direction: column; gap: 4px; }
+.profile-field label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #9CA3AF;
+}
+.profile-value {
+  font-size: 14px;
+  color: #1F2937;
+  font-weight: 500;
+}
+
+/* ── STATUS CARD ── */
+.status-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #EDE9FE;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(91,33,182,.07);
+  overflow: hidden;
+  position: sticky;
+  top: 24px;
+}
+.status-top {
+  padding: 22px 22px 18px;
+  background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
+  border-bottom: 1px solid #DDD6FE;
+}
+.status-label-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #7C3AED;
+  margin-bottom: 10px;
+}
+.big-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.big-status::before { content: '●'; font-size: 9px; }
+.big-status.pending  { background: #FEF3C7; color: #92400E; }
+.big-status.approved { background: #D1FAE5; color: #065F46; }
+.big-status.rejected { background: #FEE2E2; color: #991B1B; }
+
+.remarks-box {
+  margin: 0;
+  padding: 14px 22px;
+  background: #FFFBEB;
+  border-bottom: 1px solid #FDE68A;
+  font-size: 13px;
+  color: #78350F;
+  line-height: 1.5;
+}
+.remarks-box strong {
+  display: block;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  color: #92400E;
+}
+.status-meta { padding: 16px 22px; border-bottom: 1px solid #F3F4F6; }
+.status-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #F9FAFB;
+}
+.status-meta-row:last-child { border-bottom: none; }
+.status-meta-row span:first-child { color: #6B7280; }
+.status-meta-row span:last-child { color: #1F2937; font-weight: 500; }
+
+.status-actions { padding: 18px 22px; }
+.btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+  padding: 11px 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #5B21B6, #7C3AED);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(91,33,182,.3);
+  transition: transform .15s, box-shadow .15s;
+  box-sizing: border-box;
+}
+.btn-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(91,33,182,.4); }
+.btn-edit-disabled {
+  background: #F3F4F6;
+  color: #9CA3AF;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.btn-edit-disabled:hover { transform: none; box-shadow: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Application Detail</div>
+      <h1>{{ application.scholarship.name }}</h1>
+      <p>Submitted on {{ application.date_applied|date:"F j, Y" }}</p>
+    </div>
+    <a class="btn-back" href="{% url 'applications:list' %}">← Back to Applications</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LEFT: Details -->
+  <div>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-icon">🪪</div>
+        <div><h2>Personal Information</h2><p>Details submitted with this application</p></div>
+      </div>
+      <div class="info-body">
+        <div class="field-row">
+          <div class="profile-field">
+            <label>Full Name</label>
+            <div class="profile-value">{{ application.full_name }}</div>
+          </div>
+          <div class="profile-field">
+            <label>Email</label>
+            <div class="profile-value">{{ application.email }}</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="profile-field">
+            <label>Course</label>
+            <div class="profile-value">{{ application.course }}</div>
+          </div>
+          <div class="profile-field">
+            <label>Year Level</label>
+            <div class="profile-value">{{ application.year_level }}</div>
+          </div>
+        </div>
+        <div class="profile-field">
+          <label>GPA</label>
+          <div class="profile-value">{{ application.gpa }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-icon">📝</div>
+        <div><h2>Personal Statement</h2><p>Written by the applicant</p></div>
+      </div>
+      <div class="info-body">
+        <div class="profile-field">
+          <div class="profile-value" style="display:block;line-height:1.7;white-space:pre-wrap;">{{ application.statement }}</div>
+        </div>
+      </div>
+    </div>
+
+    {% if application.documents %}
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-icon">📎</div>
+        <div><h2>Uploaded Document</h2></div>
+      </div>
+      <div class="info-body">
+        <a href="{{ application.documents.url }}" target="_blank" style="color:#7C3AED;font-weight:600;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">📄 View Document →</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- RIGHT: Status card -->
+  <div>
+    <div class="status-card">
+      <div class="status-top">
+        <div class="status-label-text">Application Status</div>
+        <div><span class="big-status {{ application.status }}">{{ application.status|title }}</span></div>
+      </div>
+
+      {% if application.remarks %}
+      <div class="remarks-box">
+        <strong>Admin Remarks</strong>
+        {{ application.remarks }}
+      </div>
+      {% endif %}
+
+      <div class="status-meta">
+        <div class="status-meta-row">
+          <span>Scholarship</span>
+          <span>{{ application.scholarship.name }}</span>
+        </div>
+        <div class="status-meta-row">
+          <span>Date Applied</span>
+          <span>{{ application.date_applied|date:"M d, Y" }}</span>
+        </div>
+        <div class="status-meta-row">
+          <span>Last Updated</span>
+          <span>{{ application.updated_at|date:"M d, Y" }}</span>
+        </div>
+      </div>
+
+      <div class="status-actions">
+        {% if application.status == 'pending' %}
+          <a class="btn-edit" href="{% url 'applications:edit' application.id %}">✏️ Edit Application</a>
+        {% else %}
+          <span class="btn-edit btn-edit-disabled">✏️ Cannot Edit ({{ application.status|title }})</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

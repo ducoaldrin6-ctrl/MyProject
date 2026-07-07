@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Pending Applications | Richwell Colleges Inc.{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, #3B0764 0%, #5B21B6 55%, #7C3AED 100%);
+  padding: 52px 40px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(124,58,237,.25) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+.hero h1 { font-size: clamp(26px,5vw,38px); font-weight: 700; color:#fff; margin:0 0 10px; line-height:1.15; letter-spacing:-.3px; }
+.hero p { font-size:15px; color:rgba(255,255,255,.7); margin:0; }
+
+/* ── CONTAINER ── */
+.container { max-width:900px; margin:0 auto; padding:36px 24px 72px; }
+
+/* ── TABLE ── */
+.table-container {
+  background:#fff;
+  border-radius:16px;
+  border:1px solid #EDE9FE;
+  box-shadow:0 1px 3px rgba(0,0,0,.07),0 8px 28px rgba(91,33,182,.07);
+  overflow:hidden;
+}
+table { width:100%; border-collapse:collapse; }
+thead { background:linear-gradient(to right,#F5F3FF,#EDE9FE); }
+thead th {
+  padding:14px 22px;
+  font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:#6D28D9; text-align:left; border-bottom:1px solid #DDD6FE;
+}
+tbody tr { border-bottom:1px solid #F3F4F6; transition:background .12s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#FAFAFA; }
+tbody td { padding:16px 22px; font-size:14px; color:#374151; vertical-align:middle; }
+
+/* ── STATUS BADGES ── */
+.pending, .approved, .rejected {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 12px; border-radius:999px;
+  font-size:12px; font-weight:600;
+}
+.pending::before,.approved::before,.rejected::before { content:"●"; font-size:8px; }
+.pending  { background:#FEF3C7; color:#92400E; }
+.approved { background:#D1FAE5; color:#065F46; }
+.rejected { background:#FEE2E2; color:#991B1B; }
+.status   { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; }
+.status::before { content:"●"; font-size:8px; }
+.status.pending  { background:#FEF3C7; color:#92400E; }
+.status.approved { background:#D1FAE5; color:#065F46; }
+.status.rejected { background:#FEE2E2; color:#991B1B; }
+
+/* ── EMPTY ── */
+.empty-state { text-align:center; padding:56px 24px; }
+.empty-state h3 { font-size:17px; font-weight:700; color:#111827; margin:0 0 8px; }
+.empty-state p  { font-size:14px; color:#6B7280; margin:0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-inner">
+        <h1>Pending Applications</h1>
+        <p>View pending scholarship applications</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date Applied</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.date_applied }}</td>
+                    <td><span class="pending">Pending</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2"><div class="empty-state"><h3>No Pending Applications</h3><p>No pending applications found.</p></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

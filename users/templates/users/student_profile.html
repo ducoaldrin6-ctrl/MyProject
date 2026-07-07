@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Profile | Richwell Colleges Inc.{% endblock %}
+
+{% block head %}
+<style>
+  .sp-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    position: relative;
+  }
+  .sp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  }
+  .sp-card-head {
+    display: flex; align-items: center; gap: 14px;
+    padding: 26px 28px 20px;
+  }
+  .sp-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--purple), var(--purple-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(59,7,100,.2);
+  }
+  .sp-card-head h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--text-dark); margin: 0 0 2px; }
+  .sp-card-head p { font-size: 13px; color: var(--text-muted); margin: 0; }
+
+  .sp-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 600px) { .sp-stats { grid-template-columns: repeat(2,1fr); } }
+
+  .sp-stat { padding: 20px 22px; border-right: 1px solid var(--border); }
+  .sp-stat:last-child { border-right: none; }
+  @media (max-width: 600px) {
+    .sp-stat:nth-child(2n) { border-right: none; }
+    .sp-stat:nth-child(n+3) { border-top: 1px solid var(--border); }
+  }
+  .sp-stat-label { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .sp-stat-value { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 700; line-height: 1; color: var(--text-dark); }
+  .sp-stat:nth-child(2) .sp-stat-value { color: #065f46; }
+  .sp-stat:nth-child(3) .sp-stat-value { color: #92400e; }
+  .sp-stat:nth-child(4) .sp-stat-value { color: #991b1b; }
+
+  .sp-actions {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    padding: 20px 28px;
+    border-top: 1px solid var(--border);
+    background: var(--cream);
+  }
+  .sp-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px; border-radius: 14px;
+    font-size: 13px; font-weight: 700;
+    text-decoration: none;
+    border: 1.5px solid var(--border);
+    background: var(--white); color: var(--purple);
+    transition: background .15s, box-shadow .15s, color .15s, border-color .15s;
+  }
+  .sp-btn:hover { background: var(--purple); color: var(--white); border-color: var(--purple); box-shadow: 0 6px 18px rgba(59,7,100,.18); }
+  .sp-btn.primary { background: linear-gradient(135deg, var(--purple), var(--purple-mid)); color: var(--white); border-color: transparent; box-shadow: 0 8px 22px rgba(59,7,100,.18); }
+  .sp-btn.primary:hover { background: linear-gradient(135deg, var(--purple-mid), var(--gold)); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<div class="sp-card">
+  <div class="sp-card-head">
+    <div class="sp-icon">📊</div>
+    <div>
+      <h2>Application Status</h2>
+      <p>Overview of your scholarship application progress</p>
+    </div>
+  </div>
+
+  <div class="sp-stats">
+    <div class="sp-stat">
+      <div class="sp-stat-label">Total Applications</div>
+      <div class="sp-stat-value">{{ total_applications }}</div>
+    </div>
+    <div class="sp-stat">
+      <div class="sp-stat-label">Approved</div>
+      <div class="sp-stat-value">{{ approved_count }}</div>
+    </div>
+    <div class="sp-stat">
+      <div class="sp-stat-label">Pending</div>
+      <div class="sp-stat-value">{{ pending_count }}</div>
+    </div>
+    <div class="sp-stat">
+      <div class="sp-stat-label">Rejected</div>
+      <div class="sp-stat-value">{{ rejected_count }}</div>
+    </div>
+  </div>
+
+  <div class="sp-actions">
+    <a class="sp-btn primary" href="{% url 'applications:list' %}">View Applications</a>
+    <a class="sp-btn" href="{% url 'users:attendance' %}">View Attendance</a>
+    <a class="sp-btn" href="{% url 'users:profile_edit' %}">Edit Student Info</a>
+  </div>
+</div>
+
+{% endblock %}

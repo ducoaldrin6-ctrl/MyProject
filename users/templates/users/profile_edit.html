@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile | Richwell Colleges Inc.{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+  <div class="hero-inner">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+      <div style="width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.12);border:1px solid rgba(201,162,39,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+        <img src="{% static 'images/Logo.png' %}" alt="Richwell Logo" style="width:38px;height:38px;object-fit:contain">
+      </div>
+      <div class="hero-eyebrow" style="margin:0">Student Dashboard</div>
+    </div>
+    <h1>Edit <span style="color:var(--gold-light)">Your Profile</span></h1>
+    <p>Update your personal and account information below.</p>
+  </div>
+</div>
+
+<div class="form-card">
+  <div class="form-card-header">
+    <div class="form-card-icon">👤</div>
+    <div>
+      <h2>Profile Settings</h2>
+      <p>Manage your account and student details</p>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-body">
+      <div class="form-section">
+        <div class="form-section-title">Account Information</div>
+        {{ user_form.as_p }}
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Student Details</div>
+        {{ profile_form.as_p }}
+      </div>
+    </div>
+
+    <div class="form-footer">
+      <a class="btn-cancel" href="{% url 'users:profile' %}">← Cancel</a>
+      <button class="btn-submit" type="submit">Save Changes →</button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Richwell Colleges Inc.{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        color: #1F2937;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .dashboard-header p {
+        font-size: 1.1rem;
+        color: #6B7280;
+        margin: 0;
+    }
+
+    /* Statistics Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #7C3AED;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 8px 16px rgba(124, 58, 237, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .stat-card.applications {
+        border-left-color: #3B82F6;
+    }
+
+    .stat-card.students {
+        border-left-color: #10B981;
+    }
+
+    .stat-card.attendance {
+        border-left-color: #F59E0B;
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6B7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 2.2rem;
+        color: #1F2937;
+        font-weight: 700;
+    }
+
+    /* Status Breakdown */
+    .status-breakdown {
+        background: white;
+        border-radius: 12px;
+        padding: 28px;
+        margin-bottom: 40px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-breakdown h2 {
+        font-size: 1.5rem;
+        color: #1F2937;
+        margin-bottom: 20px;
+        font-weight: 700;
+    }
+
+    .status-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+    }
+
+    .status-item {
+        padding: 16px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #E5E7EB;
+    }
+
+    .status-item.pending {
+        background: rgba(245, 158, 11, 0.1);
+        border-color: #F59E0B;
+    }
+
+    .status-item.approved {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: #10B981;
+    }
+
+    .status-item.rejected {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: #EF4444;
+    }
+
+    .status-label {
+        font-size: 0.85rem;
+        color: #6B7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .status-count {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1F2937;
+    }
+
+    /* Recent Entries Section */
+    .recent-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .recent-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .recent-card h3 {
+        font-size: 1.2rem;
+        color: #1F2937;
+        margin-bottom: 16px;
+        font-weight: 700;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #F3F4F6;
+    }
+
+    .recent-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .recent-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .recent-item:last-child {
+        border-bottom: none;
+    }
+
+    .recent-item-name {
+        font-weight: 600;
+        color: #1F2937;
+        flex: 1;
+    }
+
+    .recent-item-date {
+        font-size: 0.85rem;
+        color: #9CA3AF;
+        margin-left: 8px;
+    }
+
+    .recent-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        margin-left: 8px;
+    }
+
+    .recent-badge.pending {
+        background: rgba(245, 158, 11, 0.2);
+        color: #B45309;
+    }
+
+    .recent-badge.approved {
+        background: rgba(16, 185, 129, 0.2);
+        color: #047857;
+    }
+
+    .recent-badge.rejected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #991B1B;
+    }
+
+    .recent-badge.present {
+        background: rgba(16, 185, 129, 0.2);
+        color: #047857;
+    }
+
+    .recent-badge.absent {
+        background: rgba(239, 68, 68, 0.2);
+        color: #991B1B;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 32px;
+        color: #9CA3AF;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 20px 16px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .recent-section {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>📊 Scholarship Management Dashboard</h1>
+        <p>System Overview & Performance Metrics</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card applications">
+            <div class="stat-icon">📋</div>
+            <div class="stat-label">Total Applications</div>
+            <div class="stat-value">{{ total_applications }}</div>
+        </div>
+
+        <div class="stat-card students">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value">{{ total_students }}</div>
+        </div>
+
+        <div class="stat-card attendance">
+            <div class="stat-icon">✓</div>
+            <div class="stat-label">Attendance Records</div>
+            <div class="stat-value">{{ total_attendance }}</div>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="status-breakdown">
+        <h2>Application Status Breakdown</h2>
+        <div class="status-items">
+            <div class="status-item pending">
+                <div class="status-label">Pending</div>
+                <div class="status-count">{{ pending_applications }}</div>
+            </div>
+            <div class="status-item approved">
+                <div class="status-label">Approved</div>
+                <div class="status-count">{{ approved_applications }}</div>
+            </div>
+            <div class="status-item rejected">
+                <div class="status-label">Rejected</div>
+                <div class="status-count">{{ rejected_applications }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Entries -->
+    <div class="recent-section">
+        <!-- Recent Applications -->
+        <div class="recent-card">
+            <h3>📋 Recent Applications</h3>
+            {% if recent_applications %}
+                <ul class="recent-list">
+                    {% for app in recent_applications %}
+                        <li class="recent-item">
+                            <div>
+                                <span class="recent-item-name">{{ app.user.get_full_name|default:app.user.username }}</span>
+                                <span class="recent-item-date">{{ app.date_applied|date:"M d, Y" }}</span>
+                            </div>
+                            <span class="recent-badge {{ app.status }}">{{ app.status }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <p>No applications yet</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Students -->
+        <div class="recent-card">
+            <h3>👥 Recent Students</h3>
+            {% if recent_students %}
+                <ul class="recent-list">
+                    {% for student in recent_students %}
+                        <li class="recent-item">
+                            <span class="recent-item-name">{{ student.user.get_full_name|default:student.user.username }}</span>
+                            <span class="recent-item-date">{{ student.user.date_joined|date:"M d, Y" }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <p>No students registered</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Attendance -->
+        <div class="recent-card">
+            <h3>✓ Recent Attendance</h3>
+            {% if recent_attendance %}
+                <ul class="recent-list">
+                    {% for record in recent_attendance %}
+                        <li class="recent-item">
+                            <div>
+                                <span class="recent-item-name">{{ record.user.get_full_name|default:record.user.username }}</span>
+                                <span class="recent-item-date">{{ record.date|date:"M d, Y" }}</span>
+                            </div>
+                            <span class="recent-badge {% if record.status == 'present' %}present{% else %}absent{% endif %}">
+                                {{ record.status }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <p>No attendance records</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Settings | Richwell Colleges Inc.{% endblock %}
+
+{% block head %}
+<style>
+  .as-wrap { max-width: 860px; margin: 0 auto; }
+  .as-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .as-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px,5vw,42px); font-weight: 700; color: var(--text-dark); margin: 0 0 28px; }
+
+  .as-grid { display: grid; grid-template-columns: 260px 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 640px) { .as-grid { grid-template-columns: 1fr; } }
+
+  /* Sidebar */
+  .as-sidebar {
+    background: linear-gradient(135deg, var(--purple), #200040);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 20px 48px rgba(59,7,100,.22);
+    position: relative;
+    overflow: hidden;
+  }
+  .as-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  }
+  .as-sidebar::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,162,39,.1) 0%, transparent 70%);
+    top: -100px; right: -60px;
+    pointer-events: none;
+  }
+  .as-logo-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.1);
+    border: 2px solid rgba(201,162,39,.4);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    overflow: hidden;
+    position: relative; z-index: 1;
+  }
+  .as-logo-ring img { width: 48px; height: 48px; object-fit: contain; }
+  .as-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: #fff; position: relative; z-index: 1; }
+  .as-username { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 4px; position: relative; z-index: 1; }
+  .as-badge {
+    display: inline-block; margin-top: 14px;
+    padding: 4px 14px; border-radius: 20px;
+    background: rgba(201,162,39,.15); border: 1px solid rgba(201,162,39,.35);
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--gold-light); position: relative; z-index: 1;
+  }
+
+  /* Main card */
+  .as-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .as-card-head { padding: 22px 28px; border-bottom: 1px solid var(--border); background: var(--cream); }
+  .as-card-head h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0; }
+  .as-fields { padding: 6px 28px 20px; }
+  .as-field { padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .as-field:last-child { border-bottom: none; }
+  .as-field-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+  .as-field-value { font-size: 15px; color: var(--text-dark); font-weight: 500; }
+  .as-foot { padding: 20px 28px; border-top: 1px solid var(--border); background: var(--cream); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="as-wrap">
+  <div class="as-eyebrow">Richwell Colleges Inc.</div>
+  <h1 class="as-title">Account Settings</h1>
+
+  <div class="as-grid">
+    <aside>
+      <div class="as-sidebar">
+        <div class="as-logo-ring">
+          <img src="{% static 'images/Logo.png' %}" alt="Richwell Logo">
+        </div>
+        <div class="as-name">{{ user.get_full_name }}</div>
+        <div class="as-username">@{{ user.username }}</div>
+        <div class="as-badge">Student</div>
+      </div>
+    </aside>
+
+    <div class="as-card">
+      <div class="as-card-head"><h3>Account Details</h3></div>
+      <div class="as-fields">
+        <div class="as-field">
+          <div class="as-field-label">📧 Email Address</div>
+          <div class="as-field-value">{{ user.email|default:'Not provided' }}</div>
+        </div>
+        <div class="as-field">
+          <div class="as-field-label">🗓 Member Since</div>
+          <div class="as-field-value">{{ user.date_joined|date:'F Y' }}</div>
+        </div>
+        <div class="as-field">
+          <div class="as-field-label">🔐 Last Login</div>
+          <div class="as-field-value">{{ user.last_login|date:'M d, Y'|default:'—' }}</div>
+        </div>
+      </div>
+      <div class="as-foot">
+        <a class="btn btn-primary" href="{% url 'users:profile_edit' %}">Edit Account →</a>
+      </div>
+    </div>
+
+    <div class="as-card" style="margin-top: 22px;">
+      <div class="as-card-head"><h3>🔒 Biometric Authentication</h3></div>
+      <div class="as-fields">
+        <div class="as-field">
+          <div class="as-field-label">Registered Devices</div>
+          <div class="as-field-value" id="credential-count">{{ user.webauthn_credentials.count }} device(s) registered</div>
+        </div>
+      </div>
+      <div class="as-foot">
+        <button class="btn btn-primary" type="button" id="register-biometric-btn">Register Biometric Device →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('register-biometric-btn')?.addEventListener('click', async function() {
+  try {
+    const beginResp = await fetch('{% url "security:webauthn_register_begin" %}');
+    const beginData = await beginResp.json();
+    const options = beginData.options;
+
+    options.challenge = Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    options.user.id = Uint8Array.from(atob(options.user.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    if (options.excludeCredentials) {
+      options.excludeCredentials = options.excludeCredentials.map(cred => ({
+        ...cred,
+        id: Uint8Array.from(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+      }));
+    }
+
+    const credential = await navigator.credentials.create({ publicKey: options });
+
+    const attestationObject = new Uint8Array(credential.response.attestationObject);
+    const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
+
+    const credentialData = {
+      id: credential.id,
+      rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+      type: credential.type,
+      response: {
+        attestationObject: btoa(String.fromCharCode(...attestationObject)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+        clientDataJSON: btoa(String.fromCharCode(...clientDataJSON)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+      },
+    };
+
+    const verifyResp = await fetch('{% url "security:webauthn_register_complete" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+      body: JSON.stringify(credentialData),
+    });
+    const verifyData = await verifyResp.json();
+
+    if (verifyData.success) {
+      document.getElementById('credential-count').textContent = '1 device(s) registered';
+      alert('Biometric device registered successfully!');
+    } else {
+      alert('Registration failed: ' + (verifyData.error || 'Unknown error'));
+    }
+  } catch (err) {
+    alert('Registration error: ' + err.message);
+  }
+});
+</script>
