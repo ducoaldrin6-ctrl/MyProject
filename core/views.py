@@ -54,6 +54,19 @@ def send_otp(user, otp_code):
     )
 
 
+def issue_otp(request, user, action):
+    otp_code = generate_otp()
+    OTPCode.objects.create(user=user, code=otp_code)
+    try:
+        send_otp(user, otp_code)
+        messages.success(request, 'OTP sent. Check your email for the code.')
+    except Exception as exc:
+        print(f'OTP email failed: {exc}')
+        print(f'OTP for {user.username}: {otp_code}')
+        messages.warning(request, 'Email OTP is not available yet. Check the server terminal for your OTP code.')
+    log_action(request, user, action)
+
+
 def login_attempt_key(request, username):
     username = (username or '').strip().lower() or 'unknown'
     return f"login_attempts:{get_client_ip(request)}:{username}"
@@ -154,18 +167,9 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user:
                 if user.is_active:
-                    otp_code = generate_otp()
-                    OTPCode.objects.create(user=user, code=otp_code)
-                    try:
-                        send_otp(user, otp_code)
-                        messages.success(request, 'OTP generated. Check your email for the code.')
-                    except Exception as exc:
-                        print(f'OTP email failed: {exc}')
-                        print(f'OTP for {user.username}: {otp_code}')
-                        messages.warning(request, 'Email OTP is not available yet. Check the server terminal for your OTP code.')
                     request.session['pre_auth_user'] = user.pk
                     reset_failed_login(request, username)
-                    log_action(request, user, 'OTP generated for login')
+                    issue_otp(request, user, 'OTP generated for login')
                     return redirect('core:otp_verify')
                 messages.error(request, 'Account is disabled.')
             else:
@@ -204,6 +208,10 @@ def otp_verify(request):
         return redirect('core:login')
 
     if request.method == 'POST':
+        if request.POST.get('action') == 'resend':
+            issue_otp(request, user, 'OTP resent for login')
+            return redirect('core:otp_verify')
+
         otp_code = request.POST.get('otp_code')
         otp_record = OTPCode.objects.filter(user=user, code=otp_code, is_used=False).order_by('-created_at').first()
         if otp_record and timezone.now() - otp_record.created_at <= timedelta(seconds=settings.OTP_EXPIRATION_SECONDS):

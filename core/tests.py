@@ -1,11 +1,12 @@
 from datetime import date
 from io import StringIO
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Application, AttendanceRecord, AuditLog, Scholar, User
+from .models import Application, AttendanceRecord, AuditLog, OTPCode, Scholar, User
 
 
 class CoreViewTests(TestCase):
@@ -80,6 +81,19 @@ class CoreViewTests(TestCase):
         response = self.client.get(reverse('core:signup'))
 
         self.assertRedirects(response, reverse('core:dashboard'))
+
+    @patch('core.views.send_otp')
+    def test_otp_page_can_resend_code(self, mocked_send_otp):
+        session = self.client.session
+        session['pre_auth_user'] = self.staff.pk
+        session.save()
+
+        response = self.client.post(reverse('core:otp_verify'), {'action': 'resend'})
+
+        self.assertRedirects(response, reverse('core:otp_verify'))
+        self.assertEqual(OTPCode.objects.filter(user=self.staff, is_used=False).count(), 1)
+        self.assertTrue(AuditLog.objects.filter(action='OTP resent for login').exists())
+        mocked_send_otp.assert_called_once()
 
     def test_staff_cannot_delete_scholar(self):
         self.client.force_login(self.staff)
