@@ -8,9 +8,9 @@ services:
       - key: DJANGO_DEBUG
         value: False
       - key: DJANGO_ALLOWED_HOSTS
-        value: myproject.onrender.com
+        value: myproject-jc1o.onrender.com
       - key: DJANGO_CSRF_TRUSTED_ORIGINS
-        value: https://myproject.onrender.com
+        value: https://myproject-jc1o.onrender.com
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: SECURE_SSL_REDIRECT
