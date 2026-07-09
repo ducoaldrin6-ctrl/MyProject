@@ -63,7 +63,7 @@ def issue_otp(request, user, action):
     except Exception as exc:
         print(f'OTP email failed: {exc}')
         print(f'OTP for {user.username}: {otp_code}')
-        messages.warning(request, 'Email OTP is not available yet. Check the server terminal for your OTP code.')
+        messages.warning(request, 'OTP email could not be sent. Please contact an administrator or try again shortly.')
     log_action(request, user, action)
 
 
