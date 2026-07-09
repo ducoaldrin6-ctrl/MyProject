@@ -71,7 +71,10 @@ def issue_otp(request, user, action):
             flush=True,
         )
         print(f'OTP for {user.username}: {otp_code}', flush=True)
-        messages.warning(request, 'OTP email could not be sent. Please contact an administrator or try again shortly.')
+        if settings.OTP_SHOW_CODE_ON_EMAIL_FAILURE:
+            messages.warning(request, f'Email is unavailable. Your OTP is {otp_code}.')
+        else:
+            messages.warning(request, 'OTP email could not be sent. Please contact an administrator or try again shortly.')
     log_action(request, user, action)
 
 
