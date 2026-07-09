@@ -11,6 +11,7 @@
             <div class="auth-badge">Richwell</div>
         </div>
         <h1>Scholarship Management</h1>
+        <p>Track scholars, attendance, applications, and reports through a secure OTP login.</p>
         <div class="auth-highlights">
             <div>
                 <span><i class="bi bi-shield-lock-fill"></i></span>
@@ -33,6 +34,7 @@
                 <img src="{% static 'images/logo.png' %}" alt="Richwell Scholarship logo">
             </div>
             <h2 class="fw-bold mb-4">Login</h2>
+            <p class="auth-subtitle">Enter your account details. We will send a one-time code to your email.</p>
 
             <form method="post" novalidate>
                 {% csrf_token %}
@@ -47,6 +49,10 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>
             </form>
+            <div class="auth-switch">
+                New staff member?
+                <a href="{% url 'core:signup' %}">Create an account</a>
+            </div>
 
         </div>
     </section>

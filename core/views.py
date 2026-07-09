@@ -19,7 +19,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 
-from .forms import ApplicationReviewForm, AttendanceForm, ApplicationForm, LoginForm, ScholarForm, UserAccountForm
+from .forms import ApplicationReviewForm, AttendanceForm, ApplicationForm, LoginForm, ScholarForm, SignUpForm, UserAccountForm
 from .models import Application, AuditLog, AttendanceRecord, OTPCode, Scholar, User
 
 
@@ -178,6 +178,20 @@ def login_view(request):
         'core/login.html',
         {'form': form},
     )
+
+
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('core:dashboard')
+
+    form = SignUpForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = form.save()
+        messages.success(request, 'Account created. Log in to receive your OTP code.')
+        log_action(request, user, 'Staff account created through signup')
+        return redirect('core:login')
+
+    return render(request, 'core/signup.html', {'form': form})
 
 
 def otp_verify(request):

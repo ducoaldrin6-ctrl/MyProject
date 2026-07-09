@@ -36,6 +36,7 @@ urlpatterns = [
     path('accounts/add/', views.account_create, name='account_create'),
     path('accounts/<int:pk>/edit/', views.account_update, name='account_update'),
     path('login/', views.login_view, name='login'),
+    path('signup/', views.signup_view, name='signup'),
     path('logout/', views.logout_view, name='logout'),
     path('otp/', views.otp_verify, name='otp_verify'),
 ]

@@ -52,6 +52,35 @@ class CoreViewTests(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
 
+    def test_signup_page_renders_for_guests(self):
+        response = self.client.get(reverse('core:signup'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Create Staff Account')
+
+    def test_signup_creates_staff_account(self):
+        response = self.client.post(reverse('core:signup'), {
+            'username': 'newstaff',
+            'email': 'newstaff@example.com',
+            'first_name': 'New',
+            'last_name': 'Staff',
+            'password1': 'StrongPass2026!',
+            'password2': 'StrongPass2026!',
+        })
+
+        self.assertRedirects(response, reverse('core:login'))
+        user = User.objects.get(username='newstaff')
+        self.assertEqual(user.role, 'staff')
+        self.assertFalse(user.is_staff)
+        self.assertTrue(user.check_password('StrongPass2026!'))
+
+    def test_authenticated_user_cannot_open_signup(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse('core:signup'))
+
+        self.assertRedirects(response, reverse('core:dashboard'))
+
     def test_staff_cannot_delete_scholar(self):
         self.client.force_login(self.staff)
 

@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import Application, AttendanceRecord, Scholar, User
@@ -25,6 +25,41 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Enter your password',
             'autocomplete': 'current-password',
         })
+
+
+class SignUpForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        placeholders = {
+            'username': 'Choose a username',
+            'email': 'Your email for OTP codes',
+            'first_name': 'First name',
+            'last_name': 'Last name',
+            'password1': 'Create a password',
+            'password2': 'Confirm your password',
+        }
+        for name, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'form-control form-control-lg',
+                'placeholder': placeholders.get(name, ''),
+            })
+        self.fields['email'].required = True
+        self.fields['password1'].widget.attrs['autocomplete'] = 'new-password'
+        self.fields['password2'].widget.attrs['autocomplete'] = 'new-password'
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = 'staff'
+        user.email = self.cleaned_data['email']
+        user.is_staff = False
+        user.is_superuser = False
+        if commit:
+            user.save()
+        return user
 
 
 class ScholarForm(forms.ModelForm):
