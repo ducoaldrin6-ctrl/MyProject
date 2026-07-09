@@ -1,0 +1,41 @@
+from django.urls import path
+from . import views
+
+app_name = 'core'
+
+urlpatterns = [
+    path('', views.dashboard, name='dashboard'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('scholars/', views.scholar_list, name='scholar_list'),
+    path('scholars/add/', views.scholar_create, name='scholar_create'),
+    path('scholars/<int:pk>/', views.scholar_detail, name='scholar_detail'),
+    path('scholars/<int:pk>/edit/', views.scholar_update, name='scholar_update'),
+    path('scholars/<int:pk>/delete/', views.scholar_delete, name='scholar_delete'),
+    path('attendance/', views.attendance_list, name='attendance_list'),
+    path('attendance/add/', views.attendance_create, name='attendance_create'),
+    path('attendance/<int:pk>/edit/', views.attendance_update, name='attendance_update'),
+    path('attendance/<int:pk>/delete/', views.attendance_delete, name='attendance_delete'),
+    path('attendance/export/csv/', views.attendance_export_csv, name='attendance_export_csv'),
+    path('attendance/export/excel/', views.attendance_export_excel, name='attendance_export_excel'),
+    path('attendance/export/pdf/', views.attendance_export_pdf, name='attendance_export_pdf'),
+    path('applications/', views.application_list, name='application_list'),
+    path('applications/export/csv/', views.application_export_csv, name='application_export_csv'),
+    path('applications/export/excel/', views.application_export_excel, name='application_export_excel'),
+    path('applications/export/pdf/', views.application_export_pdf, name='application_export_pdf'),
+    path('applications/report/', views.application_report, name='application_report'),
+    path('applications/pdf/', views.application_report_pdf, name='application_report_pdf'),
+    path('applications/<int:pk>/pdf/', views.application_detail_pdf, name='application_detail_pdf'),
+    path('applications/add/', views.application_create, name='application_create'),
+    path('applications/<int:pk>/', views.application_detail, name='application_detail'),
+    path('applications/<int:pk>/review/', views.application_review, name='application_review'),
+    path('applications/<int:pk>/edit/', views.application_update, name='application_update'),
+    path('applications/<int:pk>/delete/', views.application_delete, name='application_delete'),
+    path('audit-logs/', views.audit_log_list, name='audit_log_list'),
+    path('accounts/', views.account_list, name='account_list'),
+    path('account/settings/', views.account_settings, name='account_settings'),
+    path('accounts/add/', views.account_create, name='account_create'),
+    path('accounts/<int:pk>/edit/', views.account_update, name='account_update'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('otp/', views.otp_verify, name='otp_verify'),
+]

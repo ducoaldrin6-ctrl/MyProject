@@ -1,0 +1,162 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="hero-panel mb-4">
+    <div class="d-flex align-items-start gap-3">
+        <div class="hero-icon"><i class="bi bi-stars"></i></div>
+        <div>
+        <p class="eyebrow mb-2">Scholarship Operations</p>
+        <h1 class="display-6 fw-bold mb-2">Richwell Scholarship Management</h1>
+        <p class="mb-0 opacity-75">Track scholars, attendance, application progress, and commitment fee reports from one workspace.</p>
+        </div>
+    </div>
+    <div class="hero-actions">
+        <a href="{% url 'core:scholar_create' %}" class="btn btn-light">Add Scholar</a>
+        <a href="{% url 'core:application_report' %}" class="btn btn-outline-light">View Report</a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4 col-lg-3">
+        <div class="card stat-card border-0">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted"><i class="bi bi-people-fill me-1"></i>Users</h6>
+                <h2 class="display-6 text-purple">{{ stats.users_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card stat-card border-0 bg-purple text-white">
+            <div class="card-body">
+                <h6 class="text-uppercase"><i class="bi bi-shield-lock-fill me-1"></i>Active OTPs</h6>
+                <h2 class="display-6">{{ stats.active_otps }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card stat-card border-0 bg-gold text-dark">
+            <div class="card-body">
+                <h6 class="text-uppercase"><i class="bi bi-mortarboard-fill me-1"></i>Scholars</h6>
+                <h2 class="display-6">{{ stats.scholar_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card stat-card border-0 bg-white">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted"><i class="bi bi-calendar-check-fill me-1"></i>Attendance Records</h6>
+                <h2 class="display-6 text-purple">{{ stats.attendance_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card stat-card border-0 bg-success text-white">
+            <div class="card-body">
+                <h6 class="text-uppercase"><i class="bi bi-file-earmark-text-fill me-1"></i>Applications</h6>
+                <h2 class="display-6">{{ stats.application_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <a class="quick-card" href="{% url 'core:scholar_list' %}">
+            <i class="bi bi-mortarboard-fill"></i>
+            <span>Manage Scholars</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a class="quick-card" href="{% url 'core:attendance_list' %}">
+            <i class="bi bi-calendar-check-fill"></i>
+            <span>Track Attendance</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a class="quick-card" href="{% url 'core:application_list' %}">
+            <i class="bi bi-file-earmark-text-fill"></i>
+            <span>Review Applications</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a class="quick-card" href="{% url 'core:application_report' %}">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span>Open Reports</span>
+        </a>
+    </div>
+</div>
+<div class="row gy-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 data-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h4 class="mb-1">Recent Applications</h4>
+                        <p class="text-muted mb-0">Latest submitted scholarship applications.</p>
+                    </div>
+                    <a href="{% url 'core:application_list' %}" class="btn btn-sm btn-outline-primary">Open Applications</a>
+                </div>
+                {% if recent_applications %}
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Application</th>
+                                    <th>Scholar</th>
+                                    <th>Status</th>
+                                    <th>Submitted By</th>
+                                    <th>Submitted</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for application in recent_applications %}
+                                    <tr>
+                                        <td>{{ application.application_id }}</td>
+                                        <td>{{ application.scholar }}</td>
+                                        <td>{{ application.get_status_display }}</td>
+                                        <td>{{ application.submitted_by|default:'-' }}</td>
+                                        <td>{{ application.submitted_at|date:'Y-m-d' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No applications submitted yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 data-card">
+            <div class="card-body">
+                <h5 class="mb-3">Scholar Status Monitoring</h5>
+                <canvas id="scholarStatusChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('scholarStatusChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active', 'Probation', 'Inactive'],
+                datasets: [{
+                    data: [{{ stats.scholar_active_count }}, {{ stats.scholar_probation_count }}, {{ stats.scholar_inactive_count }}],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

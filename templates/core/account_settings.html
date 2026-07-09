@@ -1,0 +1,92 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow text-purple mb-2">Settings</p>
+        <h1>My Account</h1>
+        <p class="text-muted">Review your login account, role, and available permissions.</p>
+    </div>
+    <div class="page-actions">
+        <form method="post" action="{% url 'core:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card detail-card border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="account-avatar"><i class="bi bi-person-fill"></i></div>
+                    <div>
+                        <h2 class="h4 mb-1">{{ user.get_full_name|default:user.username }}</h2>
+                        <span class="status-pill">{{ user.role|title }}</span>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="detail-metric">
+                            <strong>Username</strong>
+                            <p>{{ user.username }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-metric">
+                            <strong>Email</strong>
+                            <p>{{ user.email|default:'Not set' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-metric">
+                            <strong>First Name</strong>
+                            <p>{{ user.first_name|default:'Not set' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-metric">
+                            <strong>Last Name</strong>
+                            <p>{{ user.last_name|default:'Not set' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-metric">
+                            <strong>Status</strong>
+                            <p>{% if user.is_active %}Active{% else %}Inactive{% endif %}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-metric">
+                            <strong>Admin Site Access</strong>
+                            <p>{% if user.is_staff %}Allowed{% else %}Not allowed{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card detail-card border-0 h-100">
+            <div class="card-body">
+                <h2 class="h5 text-purple fw-bold mb-3">Access Level</h2>
+                {% if user.role == 'admin' %}
+                    <p class="text-muted">Admins can access all project modules, including account management and audit logs.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:account_list' %}" class="btn btn-primary"><i class="bi bi-people-fill me-1"></i>Manage Accounts</a>
+                        <a href="{% url 'core:audit_log_list' %}" class="btn btn-outline-primary"><i class="bi bi-shield-check me-1"></i>View Audit Logs</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Staff accounts can use daily scholarship workflows but cannot manage user accounts or audit logs.</p>
+                    <div class="access-note">
+                        <i class="bi bi-lock-fill me-2"></i>Admin-only settings are hidden and protected.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

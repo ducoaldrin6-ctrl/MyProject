@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card danger-card">
+            <div class="card-body">
+                <p class="eyebrow text-danger mb-2">Danger Zone</p>
+                <h1 class="h3 text-danger fw-bold">Delete Scholar</h1>
+                <p class="text-muted">This action permanently removes this scholar and related records.</p>
+                <p>Are you sure you want to delete <strong>{{ scholar.first_name }} {{ scholar.last_name }}</strong>?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-danger">Delete Scholar</button>
+                        <a href="{% url 'core:scholar_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

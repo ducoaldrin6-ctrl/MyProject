@@ -1,0 +1,106 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Application {{ application.application_id }}{% endblock %}
+
+{% block content %}
+<div class="card detail-card">
+    <div class="card-body border-bottom d-flex justify-content-between align-items-start flex-wrap gap-3">
+      <div>
+        <p class="eyebrow text-purple mb-2">Application Details</p>
+        <h1 class="h3 text-purple fw-bold mb-1">Application {{ application.application_id }}</h1>
+        <p class="mb-0 text-muted">{{ application.scholar }}</p>
+      </div>
+      <div class="page-actions">
+        <a href="{% url 'core:application_detail_pdf' application.pk %}" class="btn btn-sm btn-outline-secondary">Export PDF</a>
+        <a href="{% url 'core:application_update' application.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+        {% if user.role == 'admin' %}
+          <a href="{% url 'core:application_delete' application.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row gy-3">
+        <div class="col-md-4"><div class="detail-metric">
+          <strong>Status</strong>
+          <p>{{ application.get_status_display }}</p>
+        </div></div>
+        <div class="col-md-4"><div class="detail-metric">
+          <strong>Commitment Amount</strong>
+          <p>{{ application.commitment_amount }}</p>
+        </div></div>
+        <div class="col-md-4"><div class="detail-metric">
+          <strong>Submitted At</strong>
+          <p>{{ application.submitted_at|date:'Y-m-d H:i' }}</p>
+        </div></div>
+        <div class="col-md-4"><div class="detail-metric">
+          <strong>Updated At</strong>
+          <p>{{ application.updated_at|date:'Y-m-d H:i' }}</p>
+        </div></div>
+        <div class="col-md-4"><div class="detail-metric">
+          <strong>Submitted By</strong>
+          <p>{{ application.submitted_by|default:'-' }}</p>
+        </div></div>
+        <div class="col-md-4"><div class="detail-metric">
+          <strong>Reviewed By</strong>
+          <p>{{ application.reviewed_by|default:'-' }}</p>
+        </div></div>
+      </div>
+
+      {% if user.role == 'admin' %}
+      <hr>
+      <div class="card filter-card mb-4">
+        <div class="card-body">
+          <h5 class="text-purple fw-bold">Admin Review</h5>
+          <p class="text-muted">Approve, reject, or mark this application under review.</p>
+          <form method="post" action="{% url 'core:application_review' application.pk %}">
+            {% csrf_token %}
+            <div class="row g-3">
+              {% for field in review_form %}
+                <div class="col-md-6">
+                  <label class="form-label">{{ field.label }}</label>
+                  {{ field }}
+                  {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+              {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Save Review</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      <hr>
+      <div class="row gy-3">
+        <div class="col-md-6">
+          <h5>Student Notes</h5>
+          <p>{{ application.student_notes|linebreaksbr|default:'None' }}</p>
+        </div>
+        <div class="col-md-6">
+          <h5>Remarks</h5>
+          <p>{{ application.remarks|linebreaksbr|default:'None' }}</p>
+        </div>
+      </div>
+
+      <hr>
+      <div class="row gy-3">
+        <div class="col-md-6">
+          <h5>Parent / Guardian</h5>
+          <p><strong>Name:</strong> {{ application.parent_name }}</p>
+          <p><strong>Relation:</strong> {{ application.parent_relation }}</p>
+          <p><strong>Phone:</strong> {{ application.parent_phone }}</p>
+          <p><strong>Email:</strong> {{ application.parent_email }}</p>
+        </div>
+        <div class="col-md-6">
+          <h5>Guardian</h5>
+          <p><strong>Name:</strong> {{ application.guardian_name|default:'N/A' }}</p>
+          <p><strong>Relation:</strong> {{ application.guardian_relation|default:'N/A' }}</p>
+          <p><strong>Phone:</strong> {{ application.guardian_phone|default:'N/A' }}</p>
+          <p><strong>Email:</strong> {{ application.guardian_email|default:'N/A' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mt-3">
+    <a href="{% url 'core:application_list' %}" class="btn btn-secondary">Back to Applications</a>
+  </div>
+{% endblock %}

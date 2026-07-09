@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow text-purple mb-2">Scholars</p>
+        <h1>Scholar Directory</h1>
+        <p class="text-muted">Manage all scholarship recipients with filters and pagination.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'core:scholar_create' %}" class="btn btn-primary btn-lg"><i class="bi bi-plus-lg me-1"></i>Add Scholar</a>
+    </div>
+</div>
+
+<div class="card filter-card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search by name, ID, email, course">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for key, label in status_choices %}
+                        <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="year_level" class="form-select">
+                    <option value="">All Years</option>
+                    {% for key, label in year_choices %}
+                        <option value="{{ key }}" {% if year_filter == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive table-card">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Scholar ID</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Year</th>
+                <th>Status</th>
+                <th>Assigned Staff</th>
+                <th>Date Enrolled</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for scholar in page_obj.object_list %}
+                <tr>
+                    <td>{{ scholar.scholar_id }}</td>
+                    <td>{{ scholar.full_name }}</td>
+                    <td>{{ scholar.course }}</td>
+                    <td>{{ scholar.year_level }}</td>
+                    <td><span class="status-pill">{{ scholar.get_status_display }}</span></td>
+                    <td>{{ scholar.assigned_to }}</td>
+                    <td>{{ scholar.date_enrolled }}</td>
+                    <td class="text-end">
+                        <div class="action-buttons">
+                        <a class="btn btn-sm btn-outline-info" href="{% url 'core:scholar_detail' scholar.pk %}">Details</a>
+                        <a class="btn btn-sm btn-outline-primary" href="{% url 'core:scholar_update' scholar.pk %}">Edit</a>
+                        {% if user.role == 'admin' %}
+                            <a class="btn btn-sm btn-outline-danger" href="{% url 'core:scholar_delete' scholar.pk %}">Delete</a>
+                        {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state text-muted">No scholars found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<nav aria-label="Scholar pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query|urlencode }}&status={{ status_filter }}&year_level={{ year_filter }}">Previous</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query|urlencode }}&status={{ status_filter }}&year_level={{ year_filter }}">Next</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}

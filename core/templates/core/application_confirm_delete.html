@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Confirm Delete Application{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+  <div class="card danger-card">
+    <div class="card-body">
+      <p class="eyebrow text-danger mb-2">Danger Zone</p>
+      <h1 class="h3 text-danger fw-bold">Delete Application</h1>
+      <p class="text-muted">This action permanently removes this application record.</p>
+      <p>Are you sure you want to delete the application for <strong>{{ application.scholar }}</strong> ({{ application.application_id }})?</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-danger">Delete Application</button>
+          <a href="{% url 'core:application_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow text-purple mb-2">Attendance</p>
+        <h1>Attendance Records</h1>
+        <p class="text-muted">View scholar attendance records and export attendance reports.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'core:attendance_export_csv' %}?q={{ query|urlencode }}&status={{ status_filter }}&date={{ date_filter }}" class="btn btn-outline-secondary">Export CSV</a>
+        <a href="{% url 'core:attendance_export_excel' %}?q={{ query|urlencode }}&status={{ status_filter }}&date={{ date_filter }}" class="btn btn-outline-secondary">Export Excel</a>
+        <a href="{% url 'core:attendance_export_pdf' %}?q={{ query|urlencode }}&status={{ status_filter }}&date={{ date_filter }}" class="btn btn-outline-secondary">Export PDF</a>
+        <a href="{% url 'core:attendance_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Attendance</a>
+    </div>
+</div>
+
+<div class="card filter-card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search by scholar name or ID">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for key, label in status_choices %}
+                        <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="date" value="{{ date_filter }}" class="form-control">
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive table-card">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Date</th>
+                <th>Scholar</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in page_obj.object_list %}
+                <tr>
+                    <td>{{ record.attendance_date }}</td>
+                    <td>{{ record.scholar }}</td>
+                    <td><span class="status-pill">{{ record.get_status_display }}</span></td>
+                    <td>{{ record.notes|default:'-' }}</td>
+                    <td class="text-end">
+                        <div class="action-buttons">
+                        <a class="btn btn-sm btn-outline-primary" href="{% url 'core:attendance_update' record.pk %}">Edit</a>
+                        {% if user.role == 'admin' %}
+                            <a class="btn btn-sm btn-outline-danger" href="{% url 'core:attendance_delete' record.pk %}">Delete</a>
+                        {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state text-muted">No attendance records found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<nav aria-label="Attendance pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query|urlencode }}&status={{ status_filter }}&date={{ date_filter }}">Previous</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query|urlencode }}&status={{ status_filter }}&date={{ date_filter }}">Next</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}
