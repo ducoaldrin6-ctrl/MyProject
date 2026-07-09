@@ -61,8 +61,16 @@ def issue_otp(request, user, action):
         send_otp(user, otp_code)
         messages.success(request, 'OTP sent. Check your email for the code.')
     except Exception as exc:
-        print(f'OTP email failed: {exc}')
-        print(f'OTP for {user.username}: {otp_code}')
+        print(
+            'OTP email failed: '
+            f'{exc.__class__.__name__}: {exc}; '
+            f'host={settings.EMAIL_HOST or "missing"}; '
+            f'user_set={bool(settings.EMAIL_HOST_USER)}; '
+            f'password_set={bool(settings.EMAIL_HOST_PASSWORD)}; '
+            f'recipient_set={bool(user.email)}',
+            flush=True,
+        )
+        print(f'OTP for {user.username}: {otp_code}', flush=True)
         messages.warning(request, 'OTP email could not be sent. Please contact an administrator or try again shortly.')
     log_action(request, user, action)
 
