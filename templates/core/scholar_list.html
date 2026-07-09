@@ -4,8 +4,8 @@
 <div class="page-header">
     <div>
         <p class="eyebrow text-purple mb-2">Scholars</p>
-        <h1>Scholar Directory</h1>
-        <p class="text-muted">Manage all scholarship recipients with filters and pagination.</p>
+        <h1>Directory</h1>
+        <p class="text-muted">Scholar records and assignments.</p>
     </div>
     <div class="page-actions">
         <a href="{% url 'core:scholar_create' %}" class="btn btn-primary btn-lg"><i class="bi bi-plus-lg me-1"></i>Add Scholar</a>
@@ -16,7 +16,7 @@
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-4">
-                <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search by name, ID, email, course">
+                <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search scholars">
             </div>
             <div class="col-md-3">
                 <select name="status" class="form-select">

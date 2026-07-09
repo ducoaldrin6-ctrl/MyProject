@@ -14,7 +14,7 @@
     <div class="container-fluid px-3 px-lg-4">
         <a class="navbar-brand brand-lockup" href="{% url 'core:dashboard' %}">
             <img src="{% static 'images/logo.png' %}" alt="Richwell Scholarship logo" class="brand-logo">
-            <span>Richwell Scholarship</span>
+            <span>Richwell</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -49,7 +49,7 @@
                     </li>
                     <li class="nav-item dropdown ms-lg-2">
                         <button class="nav-link dropdown-toggle nav-user-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-gear-fill me-1"></i>Settings
+                            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end settings-menu">
                             <li class="dropdown-header">

@@ -6,14 +6,14 @@
 <div class="page-header">
     <div>
       <p class="eyebrow text-purple mb-2">Reports</p>
-      <h1>Overall System Report</h1>
-      <p class="text-muted">Monitor scholar status, attendance records, application progress, and commitment amounts.</p>
+      <h1>Reports</h1>
+      <p class="text-muted">Scholar, attendance, and application summary.</p>
     </div>
     <div class="page-actions">
       <a href="{% url 'core:application_export_csv' %}?q={{ query|urlencode }}&status={{ status_filter }}" class="btn btn-outline-secondary">Export CSV</a>
       <a href="{% url 'core:application_export_excel' %}?q={{ query|urlencode }}&status={{ status_filter }}" class="btn btn-outline-secondary">Export Excel</a>
       <a href="{% url 'core:application_report_pdf' %}?q={{ query|urlencode }}&status={{ status_filter }}" class="btn btn-outline-secondary">Export PDF</a>
-      <a href="{% url 'core:application_list' %}" class="btn btn-secondary">Back to Applications</a>
+      <a href="{% url 'core:application_list' %}" class="btn btn-secondary">Applications</a>
     </div>
   </div>
 
@@ -39,7 +39,7 @@
     <div class="col-md-4">
       <div class="card stat-card border-0 bg-success text-white">
         <div class="card-body">
-          <h6 class="text-uppercase">Attendance Records</h6>
+          <h6 class="text-uppercase">Attendance</h6>
           <h2 class="display-6">{{ totals.attendance_records|default:'0' }}</h2>
           <p class="mb-0 opacity-75">Present {{ totals.present_records|default:'0' }} · Absent {{ totals.absent_records|default:'0' }}</p>
         </div>
@@ -80,7 +80,7 @@
     <div class="card-body">
       <form method="get" class="row g-3">
         <div class="col-md-4">
-          <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search by application or scholar">
+          <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search applications">
         </div>
         <div class="col-md-3">
           <select name="status" class="form-select">
@@ -91,7 +91,7 @@
           </select>
         </div>
         <div class="col-md-5 d-grid">
-          <button type="submit" class="btn btn-primary">Refresh Report</button>
+          <button type="submit" class="btn btn-primary">Apply</button>
         </div>
       </form>
     </div>

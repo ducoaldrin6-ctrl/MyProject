@@ -2,8 +2,8 @@ services:
   - type: web
     name: scholarship-management
     env: python
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: python manage.py migrate && python manage.py ensure_accounts && gunicorn scholarship_management.wsgi:application
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py ensure_accounts
+    startCommand: gunicorn scholarship_management.wsgi:application
     envVars:
       - key: DJANGO_DEBUG
         value: False
@@ -33,3 +33,5 @@ services:
         sync: false
       - key: DEFAULT_FROM_EMAIL
         value: aldrin.duco2526@gmail.com
+      - key: EMAIL_TIMEOUT
+        value: 8

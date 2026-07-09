@@ -4,8 +4,8 @@
 <div class="page-header">
     <div>
         <p class="eyebrow text-purple mb-2">Attendance</p>
-        <h1>Attendance Records</h1>
-        <p class="text-muted">View scholar attendance records and export attendance reports.</p>
+        <h1>Attendance</h1>
+        <p class="text-muted">Daily scholar attendance.</p>
     </div>
     <div class="page-actions">
         <a href="{% url 'core:attendance_export_csv' %}?q={{ query|urlencode }}&status={{ status_filter }}&date={{ date_filter }}" class="btn btn-outline-secondary">Export CSV</a>
@@ -19,7 +19,7 @@
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-4">
-                <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search by scholar name or ID">
+                <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search scholars">
             </div>
             <div class="col-md-3">
                 <select name="status" class="form-select">
