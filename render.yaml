@@ -1,8 +1,3 @@
-databases:
-  - name: scholarship-management-db
-    databaseName: scholarship_management
-    user: scholarship_management
-
 services:
   - type: web
     name: scholarship-management
@@ -18,10 +13,6 @@ services:
         value: https://myproject.onrender.com
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      - key: DATABASE_URL
-        fromDatabase:
-          name: scholarship-management-db
-          property: connectionString
       - key: SECURE_SSL_REDIRECT
         value: True
       - key: SECURE_HSTS_SECONDS
