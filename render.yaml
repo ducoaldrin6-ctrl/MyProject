@@ -49,8 +49,6 @@ services:
         value: aldrin.duco2526@gmail.com
       - key: EMAIL_TIMEOUT
         value: 8
-      - key: OTP_SHOW_CODE_ON_EMAIL_FAILURE
-        value: False
       - key: RECAPTCHA_SITE_KEY
         sync: false
       - key: RECAPTCHA_SECRET_KEY

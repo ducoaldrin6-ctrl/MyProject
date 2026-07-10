@@ -54,11 +54,15 @@ class CoreViewTests(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
 
-    def test_signup_page_renders_for_guests(self):
-        response = self.client.get(reverse('core:signup'))
+    def test_guest_cannot_create_account(self):
+        response = self.client.post(reverse('core:signup'), {
+            'username': 'newstaff',
+            'password1': 'StrongPass2026!',
+            'password2': 'StrongPass2026!',
+        })
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Create Staff Account')
+        self.assertRedirects(response, reverse('core:login'))
+        self.assertFalse(User.objects.filter(username='newstaff').exists())
 
     @override_settings(
         DEBUG=False,
@@ -96,28 +100,24 @@ class CoreViewTests(TestCase):
         self.assertContains(response, 'Please complete the reCAPTCHA verification')
         mocked_issue_otp.assert_not_called()
 
-    def test_signup_creates_staff_account(self):
-        response = self.client.post(reverse('core:signup'), {
-            'username': 'newstaff',
-            'email': 'newstaff@example.com',
-            'first_name': 'New',
-            'last_name': 'Staff',
-            'password1': 'StrongPass2026!',
-            'password2': 'StrongPass2026!',
-        })
+    @override_settings(DEBUG=True, RECAPTCHA_SITE_KEY='', RECAPTCHA_SECRET_KEY='')
+    @patch('core.views.generate_otp', return_value='502851')
+    @patch('core.views.send_otp', side_effect=RuntimeError('SMTP unavailable'))
+    def test_failed_email_never_exposes_otp(self, mocked_send_otp, mocked_generate_otp):
+        response = self.client.post(reverse('core:login'), {
+            'username': self.staff.username,
+            'password': 'password123',
+        }, HTTP_HOST='localhost')
 
-        self.assertRedirects(response, reverse('core:login'))
-        user = User.objects.get(username='newstaff')
-        self.assertEqual(user.role, 'staff')
-        self.assertFalse(user.is_staff)
-        self.assertTrue(user.check_password('StrongPass2026!'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'We could not send the Gmail OTP')
+        self.assertNotContains(response, '502851')
+        self.assertFalse(OTPCode.objects.filter(user=self.staff, is_used=False).exists())
 
-    def test_authenticated_user_cannot_open_signup(self):
-        self.client.force_login(self.staff)
-
+    def test_only_admin_is_sent_to_account_creation(self):
+        self.client.force_login(self.admin)
         response = self.client.get(reverse('core:signup'))
-
-        self.assertRedirects(response, reverse('core:dashboard'))
+        self.assertRedirects(response, reverse('core:account_create'))
 
     @patch('core.views.send_otp')
     def test_otp_page_can_resend_code(self, mocked_send_otp):

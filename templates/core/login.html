@@ -51,12 +51,15 @@
                 <div class="recaptcha-wrap mb-3">
                     <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
                 </div>
+                {% elif not recaptcha_configured and not local_recaptcha_bypass %}
+                <div class="alert alert-warning small" role="alert">
+                    Sign-in is temporarily disabled because reCAPTCHA is not configured. Ask the administrator to add the reCAPTCHA keys.
+                </div>
                 {% endif %}
-                <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>
+                <button type="submit" class="btn btn-primary btn-lg w-100" {% if not recaptcha_configured and not local_recaptcha_bypass %}disabled{% endif %}>Login</button>
             </form>
             <div class="auth-switch">
-                New staff member?
-                <a href="{% url 'core:signup' %}">Create an account</a>
+                Need an account? Contact your scholarship administrator.
             </div>
 
         </div>

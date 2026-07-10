@@ -104,7 +104,7 @@ Optional environment variables:
 - `LOGIN_LOCKOUT_SECONDS`: lockout duration in seconds
 - `DATABASE_URL`: PostgreSQL connection URL; the Render blueprint configures this automatically
 
-For local development, OTP emails are printed to the console because the project uses Django's console email backend.
+For local development without Gmail settings, Django can print email content to the console. Production OTP codes are email-only and are never shown in the browser or application logs.
 
 Use `.env.example` as a guide for production hosting variables. Do not commit your real `.env` file.
 

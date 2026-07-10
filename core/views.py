@@ -21,7 +21,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 
-from .forms import ApplicationReviewForm, AttendanceForm, ApplicationForm, LoginForm, ScholarForm, SignUpForm, UserAccountForm
+from .forms import ApplicationReviewForm, AttendanceForm, ApplicationForm, LoginForm, ScholarForm, UserAccountForm
 from .models import Application, AuditLog, AttendanceRecord, OTPCode, Scholar, User
 from .services import assess_scholar_risk
 
@@ -47,7 +47,7 @@ def generate_otp():
 
 def send_otp(user, otp_code):
     if not user.email:
-        return
+        raise ValueError('The account does not have an email address.')
     send_mail(
         subject='Your Richwell Scholarship login OTP',
         message=f'Your one-time password is {otp_code}. It expires in 5 minutes.',
@@ -59,12 +59,14 @@ def send_otp(user, otp_code):
 
 def issue_otp(request, user, action):
     otp_code = generate_otp()
-    OTPCode.objects.filter(user=user, is_used=False).update(is_used=True)
-    OTPCode.objects.create(user=user, code=make_password(otp_code))
+    otp_record = OTPCode.objects.create(user=user, code=make_password(otp_code))
     try:
         send_otp(user, otp_code)
+        OTPCode.objects.filter(user=user, is_used=False).exclude(pk=otp_record.pk).update(is_used=True)
         messages.success(request, 'OTP sent. Check your email for the code.')
     except Exception as exc:
+        otp_record.is_used = True
+        otp_record.save(update_fields=['is_used'])
         print(
             'OTP email failed: '
             f'{exc.__class__.__name__}: {exc}; '
@@ -74,12 +76,11 @@ def issue_otp(request, user, action):
             f'recipient_set={bool(user.email)}',
             flush=True,
         )
-        if settings.OTP_SHOW_CODE_ON_EMAIL_FAILURE:
-            print(f'OTP for {user.username}: {otp_code}', flush=True)
-            messages.warning(request, f'Email is unavailable. Your OTP is {otp_code}.')
-        else:
-            messages.warning(request, 'OTP email could not be sent. Please contact an administrator or try again shortly.')
+        messages.error(request, 'We could not send the Gmail OTP. Please try again or ask an administrator to verify this account email.')
+        log_action(request, user, 'OTP email delivery failed')
+        return False
     log_action(request, user, action)
+    return True
 
 
 def login_attempt_key(request, username):
@@ -213,37 +214,38 @@ def login_view(request):
                 if user.is_active:
                     request.session['pre_auth_user'] = user.pk
                     reset_failed_login(request, username)
-                    issue_otp(request, user, 'OTP generated for login')
-                    return redirect('core:otp_verify')
-                messages.error(request, 'Account is disabled.')
+                    if issue_otp(request, user, 'OTP generated for login'):
+                        return redirect('core:otp_verify')
+                    request.session.pop('pre_auth_user', None)
+                else:
+                    messages.error(request, 'Account is disabled.')
             else:
                 record_failed_login(request, username)
                 messages.error(request, 'Invalid username or password.')
         else:
             record_failed_login(request, username)
+    recaptcha_configured = bool(settings.RECAPTCHA_SITE_KEY and settings.RECAPTCHA_SECRET_KEY)
+    local_recaptcha_bypass = settings.DEBUG and request.get_host().split(':')[0] in {'localhost', '127.0.0.1', '[::1]'}
     return render(
         request,
         'core/login.html',
         {
             'form': form,
             'recaptcha_enabled': recaptcha_enabled(request),
+            'recaptcha_configured': recaptcha_configured,
+            'local_recaptcha_bypass': local_recaptcha_bypass,
             'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY,
         },
     )
 
 
 def signup_view(request):
+    if request.user.is_authenticated and request.user.role == 'admin':
+        return redirect('core:account_create')
+    messages.error(request, 'Accounts can only be created by an administrator.')
     if request.user.is_authenticated:
         return redirect('core:dashboard')
-
-    form = SignUpForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        user = form.save()
-        messages.success(request, 'Account created. Log in to receive your OTP code.')
-        log_action(request, user, 'Staff account created through signup')
-        return redirect('core:login')
-
-    return render(request, 'core/signup.html', {'form': form})
+    return redirect('core:login')
 
 
 def otp_verify(request):
@@ -257,8 +259,10 @@ def otp_verify(request):
 
     if request.method == 'POST':
         if request.POST.get('action') == 'resend':
-            issue_otp(request, user, 'OTP resent for login')
-            return redirect('core:otp_verify')
+            if issue_otp(request, user, 'OTP resent for login'):
+                return redirect('core:otp_verify')
+            request.session.pop('pre_auth_user', None)
+            return redirect('core:login')
 
         otp_code = request.POST.get('otp_code', '').strip()
         otp_record = OTPCode.objects.filter(user=user, is_used=False).order_by('-created_at').first()
