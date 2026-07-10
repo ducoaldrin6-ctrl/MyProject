@@ -169,6 +169,7 @@ In local development on `localhost` or `127.0.0.1`, reCAPTCHA is bypassed when `
 - Set `DJANGO_CSRF_TRUSTED_ORIGINS` to your `https://` domain.
 - Configure SMTP email for OTP delivery.
 - Configure reCAPTCHA keys.
+- Configure the managed admin and staff account variables before deploying.
 - Run `python manage.py collectstatic`.
 - Run `python manage.py migrate`.
 
