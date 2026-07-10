@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Student Support Insights{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow text-purple mb-2">Decision Support</p>
+        <h1>Student Support Insights</h1>
+        <p class="text-muted">Prioritize supportive follow-ups using explainable local data. Never use this score as an eligibility decision.</p>
+    </div>
+</div>
+<div class="card filter-card mb-4"><div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4"><label class="form-label" for="level">Risk level</label><select id="level" name="level" class="form-select"><option value="">All levels</option><option value="high" {% if level_filter == 'high' %}selected{% endif %}>High</option><option value="medium" {% if level_filter == 'medium' %}selected{% endif %}>Medium</option><option value="low" {% if level_filter == 'low' %}selected{% endif %}>Low</option></select></div>
+        <div class="col-md-auto"><button class="btn btn-primary" type="submit">Apply Filter</button></div>
+        {% if level_filter %}<div class="col-md-auto"><a class="btn btn-outline-secondary" href="{% url 'core:support_insights' %}">Clear</a></div>{% endif %}
+    </form>
+</div></div>
+<div class="table-responsive table-card">
+    <table class="table table-hover align-middle">
+        <thead><tr><th>Scholar</th><th>Indicator</th><th>Attendance</th><th>Primary factor</th><th>Confidence</th><th></th></tr></thead>
+        <tbody>
+        {% for assessment in assessments %}
+        <tr><td><strong>{{ assessment.scholar.full_name }}</strong><small class="d-block text-muted">{{ assessment.scholar.scholar_id }}</small></td><td><span class="risk-badge risk-{{ assessment.level }}">{{ assessment.level|title }} · {{ assessment.score }}</span></td><td>{% if assessment.attendance_rate != None %}{{ assessment.attendance_rate }}%{% else %}No data{% endif %}</td><td>{{ assessment.factors.0 }}</td><td>{{ assessment.confidence|title }}</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{% url 'core:scholar_detail' assessment.scholar.pk %}">Review</a></td></tr>
+        {% empty %}<tr><td colspan="6" class="empty-state text-muted">No scholars match this filter.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="alert alert-light border mt-3"><strong>Model:</strong> {{ method }}. Once at least 20 scholar records with enough outcome variety exist, the system automatically uses local logistic regression. No personal data is sent to an external AI service.</div>
+{% endblock %}

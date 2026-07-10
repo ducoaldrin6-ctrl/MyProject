@@ -7,12 +7,12 @@
         <div>
         <p class="eyebrow mb-2">Dashboard</p>
         <h1 class="display-6 fw-bold mb-2">Scholarship Management</h1>
-        <p class="mb-0 opacity-75">A clear view of scholars, attendance, applications, and reports.</p>
+        <p class="mb-0 opacity-75">Welcome, {{ user.first_name|default:user.username }}. Here is today’s scholarship overview.</p>
         </div>
     </div>
     <div class="hero-actions">
         <a href="{% url 'core:scholar_create' %}" class="btn btn-light">Add Scholar</a>
-        <a href="{% url 'core:application_report' %}" class="btn btn-outline-light">Reports</a>
+        <a href="{% url 'core:application_create' %}" class="btn btn-outline-light">New Application</a>
     </div>
 </div>
 
@@ -20,8 +20,8 @@
     <div class="col-md-4 col-lg-3">
         <div class="card stat-card border-0">
             <div class="card-body">
-                <h6 class="text-uppercase text-muted"><i class="bi bi-people-fill me-1"></i>Accounts</h6>
-                <h2 class="display-6 text-purple">{{ stats.users_count }}</h2>
+                <h6 class="text-uppercase text-muted"><i class="bi bi-hourglass-split me-1"></i>Awaiting Review</h6>
+                <h2 class="display-6 text-purple">{{ stats.application_pending_count }}</h2>
             </div>
         </div>
     </div>
@@ -56,6 +56,32 @@
                 <h2 class="display-6">{{ stats.scholar_active_count }}</h2>
             </div>
         </div>
+    </div>
+</div>
+<div class="card insight-card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div>
+                <p class="eyebrow text-purple mb-1">Student Support</p>
+                <h4 class="mb-1">Priority Follow-ups</h4>
+                <p class="text-muted mb-0">Explainable indicators from attendance and application history.</p>
+            </div>
+            <a href="{% url 'core:support_insights' %}" class="btn btn-outline-primary">View Insights</a>
+        </div>
+        {% if priority_assessments %}
+        <div class="row g-3">
+            {% for assessment in priority_assessments %}
+            <div class="col-md-6 col-lg-4">
+                <a class="priority-item" href="{% url 'core:scholar_detail' assessment.scholar.pk %}">
+                    <span><strong>{{ assessment.scholar.full_name }}</strong><small>{{ assessment.factors.0 }}</small></span>
+                    <span class="risk-badge risk-{{ assessment.level }}">{{ assessment.level|title }}</span>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state compact"><i class="bi bi-check-circle"></i> No priority follow-ups detected.</div>
+        {% endif %}
     </div>
 </div>
 <div class="row g-4 mb-4">

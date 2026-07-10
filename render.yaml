@@ -1,3 +1,7 @@
+databases:
+  - name: scholarship-management-db
+    plan: free
+
 services:
   - type: web
     name: scholarship-management
@@ -13,6 +17,12 @@ services:
         value: https://myproject-jc1o.onrender.com
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: scholarship-management-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.13.5
       - key: SECURE_SSL_REDIRECT
         value: True
       - key: SECURE_HSTS_SECONDS
@@ -23,10 +33,14 @@ services:
         value: True
       - key: EMAIL_HOST
         value: smtp.gmail.com
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
       - key: EMAIL_PORT
         value: 587
       - key: EMAIL_USE_TLS
         value: True
+      - key: EMAIL_USE_SSL
+        value: False
       - key: EMAIL_HOST_USER
         value: aldrin.duco2526@gmail.com
       - key: EMAIL_HOST_PASSWORD
@@ -36,4 +50,8 @@ services:
       - key: EMAIL_TIMEOUT
         value: 8
       - key: OTP_SHOW_CODE_ON_EMAIL_FAILURE
-        value: True
+        value: False
+      - key: RECAPTCHA_SITE_KEY
+        sync: false
+      - key: RECAPTCHA_SECRET_KEY
+        sync: false

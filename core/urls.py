@@ -6,6 +6,7 @@ app_name = 'core'
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('support-insights/', views.support_insights, name='support_insights'),
     path('scholars/', views.scholar_list, name='scholar_list'),
     path('scholars/add/', views.scholar_create, name='scholar_create'),
     path('scholars/<int:pk>/', views.scholar_detail, name='scholar_detail'),

@@ -6,13 +6,6 @@ from .models import Application, AttendanceRecord, Scholar, User
 
 
 class LoginForm(AuthenticationForm):
-    otp_code = forms.CharField(
-        max_length=6,
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter OTP'}),
-        help_text='Enter the 6-digit one-time password sent to your email after login.',
-    )
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.update({
@@ -151,9 +144,24 @@ class ApplicationForm(forms.ModelForm):
             'guardian_relation': forms.TextInput(attrs={'class': 'form-control'}),
             'guardian_phone': forms.TextInput(attrs={'class': 'form-control'}),
             'guardian_email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'commitment_amount': forms.NumberInput(attrs={'class': 'form-control'}),
+            'commitment_amount': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
             'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+    def clean_commitment_amount(self):
+        amount = self.cleaned_data['commitment_amount']
+        if amount < 0:
+            raise ValidationError('Commitment amount cannot be negative.')
+        return amount
+
+    def clean(self):
+        cleaned_data = super().clean()
+        guardian_fields = ['guardian_name', 'guardian_relation', 'guardian_phone', 'guardian_email']
+        if any(cleaned_data.get(name) for name in guardian_fields):
+            for name in guardian_fields[:3]:
+                if not cleaned_data.get(name):
+                    self.add_error(name, 'Complete the guardian name, relation, and phone together.')
+        return cleaned_data
 
 
 class ApplicationReviewForm(forms.ModelForm):

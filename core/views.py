@@ -1,11 +1,13 @@
 import csv
 import secrets
+import requests
 from datetime import timedelta
 from functools import wraps
 from io import BytesIO
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
+from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import send_mail
@@ -21,6 +23,7 @@ from reportlab.pdfgen import canvas
 
 from .forms import ApplicationReviewForm, AttendanceForm, ApplicationForm, LoginForm, ScholarForm, SignUpForm, UserAccountForm
 from .models import Application, AuditLog, AttendanceRecord, OTPCode, Scholar, User
+from .services import assess_scholar_risk
 
 
 def get_client_ip(request):
@@ -56,7 +59,8 @@ def send_otp(user, otp_code):
 
 def issue_otp(request, user, action):
     otp_code = generate_otp()
-    OTPCode.objects.create(user=user, code=otp_code)
+    OTPCode.objects.filter(user=user, is_used=False).update(is_used=True)
+    OTPCode.objects.create(user=user, code=make_password(otp_code))
     try:
         send_otp(user, otp_code)
         messages.success(request, 'OTP sent. Check your email for the code.')
@@ -70,8 +74,8 @@ def issue_otp(request, user, action):
             f'recipient_set={bool(user.email)}',
             flush=True,
         )
-        print(f'OTP for {user.username}: {otp_code}', flush=True)
         if settings.OTP_SHOW_CODE_ON_EMAIL_FAILURE:
+            print(f'OTP for {user.username}: {otp_code}', flush=True)
             messages.warning(request, f'Email is unavailable. Your OTP is {otp_code}.')
         else:
             messages.warning(request, 'OTP email could not be sent. Please contact an administrator or try again shortly.')
@@ -95,6 +99,34 @@ def record_failed_login(request, username):
 
 def reset_failed_login(request, username):
     cache.delete(login_attempt_key(request, username))
+
+
+def recaptcha_enabled(request):
+    hostname = request.get_host().split(':')[0]
+    is_local_debug = settings.DEBUG and hostname in {'localhost', '127.0.0.1', '[::1]'}
+    return bool(settings.RECAPTCHA_SITE_KEY and settings.RECAPTCHA_SECRET_KEY) and not is_local_debug
+
+
+def verify_recaptcha(request):
+    if not recaptcha_enabled(request):
+        return settings.DEBUG or not request.method == 'POST'
+    token = request.POST.get('g-recaptcha-response', '')
+    if not token:
+        return False
+    try:
+        response = requests.post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            data={
+                'secret': settings.RECAPTCHA_SECRET_KEY,
+                'response': token,
+                'remoteip': get_client_ip(request),
+            },
+            timeout=5,
+        )
+        response.raise_for_status()
+        return response.json().get('success') is True
+    except (requests.RequestException, ValueError):
+        return False
 
 
 def admin_required(view_func):
@@ -172,10 +204,11 @@ def login_view(request):
         username = request.POST.get('username', '')
         if is_login_locked(request, username):
             messages.error(request, 'Too many failed login attempts. Please wait before trying again.')
+        elif not verify_recaptcha(request):
+            messages.error(request, 'Please complete the reCAPTCHA verification and try again.')
         elif form.is_valid():
             username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
+            user = form.get_user()
             if user:
                 if user.is_active:
                     request.session['pre_auth_user'] = user.pk
@@ -191,7 +224,11 @@ def login_view(request):
     return render(
         request,
         'core/login.html',
-        {'form': form},
+        {
+            'form': form,
+            'recaptcha_enabled': recaptcha_enabled(request),
+            'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY,
+        },
     )
 
 
@@ -223,9 +260,13 @@ def otp_verify(request):
             issue_otp(request, user, 'OTP resent for login')
             return redirect('core:otp_verify')
 
-        otp_code = request.POST.get('otp_code')
-        otp_record = OTPCode.objects.filter(user=user, code=otp_code, is_used=False).order_by('-created_at').first()
-        if otp_record and timezone.now() - otp_record.created_at <= timedelta(seconds=settings.OTP_EXPIRATION_SECONDS):
+        otp_code = request.POST.get('otp_code', '').strip()
+        otp_record = OTPCode.objects.filter(user=user, is_used=False).order_by('-created_at').first()
+        if (
+            otp_record
+            and timezone.now() - otp_record.created_at <= timedelta(seconds=settings.OTP_EXPIRATION_SECONDS)
+            and check_password(otp_code, otp_record.code)
+        ):
             otp_record.is_used = True
             otp_record.save()
             login(request, user)
@@ -263,6 +304,12 @@ def dashboard(request):
     scholar_probation_count = Scholar.objects.filter(status='probation').count()
     scholar_inactive_count = Scholar.objects.filter(status='inactive').count()
     recent_applications = Application.objects.select_related('scholar').order_by('-submitted_at')[:5]
+    risk_assessments = sorted(
+        assess_scholar_risk(Scholar.objects.all()),
+        key=lambda assessment: assessment.score,
+        reverse=True,
+    )
+    priority_assessments = [assessment for assessment in risk_assessments if assessment.level != 'low'][:5]
     stats = {
         'users_count': User.objects.count(),
         'active_otps': OTPCode.objects.filter(is_used=False).count(),
@@ -281,6 +328,25 @@ def dashboard(request):
     return render(request, 'core/dashboard.html', {
         'stats': stats,
         'recent_applications': recent_applications,
+        'priority_assessments': priority_assessments,
+        'risk_method': risk_assessments[0].method if risk_assessments else 'Guided baseline',
+    })
+
+
+@login_required
+def support_insights(request):
+    level_filter = request.GET.get('level', '')
+    assessments = sorted(
+        assess_scholar_risk(Scholar.objects.all()),
+        key=lambda assessment: assessment.score,
+        reverse=True,
+    )
+    if level_filter in {'low', 'medium', 'high'}:
+        assessments = [assessment for assessment in assessments if assessment.level == level_filter]
+    return render(request, 'core/support_insights.html', {
+        'assessments': assessments,
+        'level_filter': level_filter,
+        'method': assessments[0].method if assessments else 'Guided baseline',
     })
 
 
@@ -310,10 +376,15 @@ def scholar_detail(request, pk):
     scholar = get_object_or_404(Scholar, pk=pk)
     applications = scholar.applications.select_related('submitted_by', 'reviewed_by').order_by('-submitted_at')
     attendance_records = scholar.attendance_records.order_by('-attendance_date')[:10]
+    risk_assessment = next(
+        (item for item in assess_scholar_risk(Scholar.objects.all()) if item.scholar.pk == scholar.pk),
+        None,
+    )
     return render(request, 'core/scholar_detail.html', {
         'scholar': scholar,
         'applications': applications,
         'attendance_records': attendance_records,
+        'risk_assessment': risk_assessment,
     })
 
 
@@ -743,6 +814,8 @@ def application_create(request):
 @login_required
 def application_update(request, pk):
     application = get_object_or_404(Application, pk=pk)
+    if request.user.role != 'admin' and application.status in {'approved', 'rejected'}:
+        return HttpResponseForbidden('Finalized applications can only be changed by an administrator.')
     if request.method == 'POST':
         form = ApplicationForm(request.POST, instance=application)
         if form.is_valid():

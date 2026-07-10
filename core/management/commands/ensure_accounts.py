@@ -35,12 +35,13 @@ class Command(BaseCommand):
                 continue
 
             user, created = User.objects.get_or_create(username=username)
-            user.email = account['email']
-            user.role = account['role']
-            user.is_staff = account['is_staff']
-            user.is_superuser = account['is_superuser']
-            user.set_password(password)
-            user.save()
-
-            action = 'Created' if created else 'Updated'
-            self.stdout.write(self.style.SUCCESS(f'{action} {account["role"]} account: {username}'))
+            if created:
+                user.email = account['email']
+                user.role = account['role']
+                user.is_staff = account['is_staff']
+                user.is_superuser = account['is_superuser']
+                user.set_password(password)
+                user.save()
+                self.stdout.write(self.style.SUCCESS(f'Created {account["role"]} account: {username}'))
+            else:
+                self.stdout.write(f'Account already exists, leaving it unchanged: {username}')

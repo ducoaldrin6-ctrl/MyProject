@@ -12,7 +12,7 @@
       </div>
       <div class="page-actions">
         <a href="{% url 'core:application_detail_pdf' application.pk %}" class="btn btn-sm btn-outline-secondary">Export PDF</a>
-        <a href="{% url 'core:application_update' application.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+        {% if user.role == 'admin' or application.status == 'pending' or application.status == 'under_review' %}<a href="{% url 'core:application_update' application.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>{% endif %}
         {% if user.role == 'admin' %}
           <a href="{% url 'core:application_delete' application.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
         {% endif %}

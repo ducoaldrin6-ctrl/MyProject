@@ -33,6 +33,10 @@ body {
     max-width: 1180px;
 }
 
+.skip-link { position: fixed; z-index: 2000; top: 0.5rem; left: 0.5rem; padding: 0.6rem 1rem; border-radius: 0.6rem; background: #fff; color: var(--purple-dark); }
+
+.app-footer { display: flex; justify-content: space-between; gap: 1rem; max-width: 1180px; margin: 0 auto; padding: 1.5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+
 .text-purple {
     color: var(--purple) !important;
 }
@@ -224,6 +228,16 @@ body {
     border: 1px solid var(--line) !important;
     box-shadow: var(--shadow-sm);
 }
+
+.insight-card { border: 1px solid rgba(111, 75, 216, 0.2); background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(239,233,255,.72)); box-shadow: var(--shadow-sm); }
+.priority-item { display: flex; align-items: center; justify-content: space-between; gap: .75rem; height: 100%; padding: .9rem; border: 1px solid var(--line); border-radius: .9rem; background: rgba(255,255,255,.8); color: var(--ink); text-decoration: none; }
+.priority-item small, .insight-list span { display: block; margin-top: .25rem; color: var(--muted); font-size: .84rem; }
+.risk-badge { display: inline-flex; white-space: nowrap; padding: .38rem .7rem; border-radius: 999px; font-size: .78rem; font-weight: 850; }
+.risk-low { background: #def7e8; color: #146c43; }
+.risk-medium { background: #fff0c2; color: #805b00; }
+.risk-high { background: #fde2e4; color: #a22532; }
+.insight-list { height: 100%; padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: rgba(255,255,255,.7); }
+.empty-state.compact { padding: 1rem; }
 
 .filter-card .card-body,
 .data-card .card-body,
@@ -618,6 +632,8 @@ body {
     font-size: 0.92rem;
 }
 
+.recaptcha-wrap { min-height: 4.9rem; overflow-x: auto; padding: 0.25rem 0; }
+
 .otp-shell {
     grid-template-columns: minmax(0, 0.9fr) minmax(340px, 0.7fr);
     max-width: 62rem;
@@ -645,6 +661,7 @@ body {
 }
 
 @media (max-width: 767.98px) {
+    .app-footer { flex-direction: column; }
     .page-header {
         flex-direction: column;
     }

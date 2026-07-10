@@ -3,7 +3,8 @@ from io import StringIO
 from unittest.mock import patch
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.contrib.auth.hashers import check_password
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import Application, AttendanceRecord, AuditLog, OTPCode, Scholar, User
@@ -59,6 +60,42 @@ class CoreViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Create Staff Account')
 
+    @override_settings(
+        DEBUG=False,
+        RECAPTCHA_SITE_KEY='test-site-key',
+        RECAPTCHA_SECRET_KEY='test-secret-key',
+    )
+    @patch('core.views.requests.post')
+    @patch('core.views.issue_otp')
+    def test_login_verifies_recaptcha_before_issuing_otp(self, mocked_issue_otp, mocked_post):
+        mocked_post.return_value.json.return_value = {'success': True}
+
+        response = self.client.post(reverse('core:login'), {
+            'username': self.staff.username,
+            'password': 'password123',
+            'g-recaptcha-response': 'verified-token',
+        })
+
+        self.assertRedirects(response, reverse('core:otp_verify'))
+        mocked_post.assert_called_once()
+        mocked_issue_otp.assert_called_once()
+
+    @override_settings(
+        DEBUG=False,
+        RECAPTCHA_SITE_KEY='test-site-key',
+        RECAPTCHA_SECRET_KEY='test-secret-key',
+    )
+    @patch('core.views.issue_otp')
+    def test_login_rejects_missing_recaptcha(self, mocked_issue_otp):
+        response = self.client.post(reverse('core:login'), {
+            'username': self.staff.username,
+            'password': 'password123',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Please complete the reCAPTCHA verification')
+        mocked_issue_otp.assert_not_called()
+
     def test_signup_creates_staff_account(self):
         response = self.client.post(reverse('core:signup'), {
             'username': 'newstaff',
@@ -94,6 +131,9 @@ class CoreViewTests(TestCase):
         self.assertEqual(OTPCode.objects.filter(user=self.staff, is_used=False).count(), 1)
         self.assertTrue(AuditLog.objects.filter(action='OTP resent for login').exists())
         mocked_send_otp.assert_called_once()
+        otp = OTPCode.objects.get(user=self.staff, is_used=False)
+        self.assertNotEqual(otp.code, mocked_send_otp.call_args.args[1])
+        self.assertTrue(check_password(mocked_send_otp.call_args.args[1], otp.code))
 
     def test_staff_cannot_delete_scholar(self):
         self.client.force_login(self.staff)
@@ -190,6 +230,32 @@ class CoreViewTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Application.objects.filter(pk=application.pk).exists())
+
+    def test_staff_cannot_edit_finalized_application(self):
+        application = Application.objects.create(
+            scholar=self.scholar,
+            application_id='APP-FINAL',
+            parent_name='Maria Santos',
+            parent_relation='Mother',
+            parent_phone='09172222222',
+            parent_email='maria@example.com',
+            commitment_amount='1000.00',
+            status='approved',
+        )
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse('core:application_update', args=[application.pk]))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_support_insights_page_renders(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse('core:support_insights'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Student Support Insights')
+        self.assertContains(response, self.scholar.full_name)
 
     def test_attendance_csv_export_uses_filters(self):
         AttendanceRecord.objects.create(
