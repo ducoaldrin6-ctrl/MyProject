@@ -103,6 +103,8 @@ Optional environment variables:
 - `LOGIN_MAX_ATTEMPTS`: failed login attempts before temporary lockout
 - `LOGIN_LOCKOUT_SECONDS`: lockout duration in seconds
 - `DATABASE_URL`: PostgreSQL connection URL; the Render blueprint configures this automatically
+- `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_EMAIL`: managed administrator account
+- `STAFF_USERNAME`, `STAFF_PASSWORD`, `STAFF_EMAIL`: managed staff account
 
 For local development without Gmail settings, Django can print email content to the console. Production OTP codes are email-only and are never shown in the browser or application logs.
 
